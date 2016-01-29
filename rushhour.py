@@ -26,12 +26,13 @@ class rushhour(StateSpace):
     board_size = ()
     goal_entrance = ()
     goal_direction = 'none'
-    def __init__(self, action, gval, parent):
+    def __init__(self, action, gval, parent, index):
 #IMPLEMENT
         """Initialize a rushhour search state object."""
         self.action = action
         self.gval = gval
         self.parent = parent
+        self.index = index
 
     def successors(self):
 #IMPLEMENT
@@ -64,7 +65,7 @@ class rushhour(StateSpace):
 #Data accessor routines.
 
     def get_vehicle_statuses(self):
-#IMPLEMENT
+#IMPLEMENT DONE
         '''Return list containing the status of each vehicle
            This list has to be in the format: [vs_1, vs_2, ..., vs_k]
            with one status list for each vehicle in the state.
@@ -78,15 +79,17 @@ class rushhour(StateSpace):
                  <is_horizontal> is true iff the vehicle is oriented horizontally
                  <is_goal> is true iff the vehicle is a goal vehicle
         '''
+        return self.vehicle_list
 
     def get_board_properties(self):
-#IMPLEMENT
+#IMPLEMENT DONE
         '''Return (board_size, goal_entrance, goal_direction)
            where board_size = (m, n) is the dimensions of the board (m rows, n columns)
                  goal_entrance = (x, y) is the location of the goal
                  goal_direction is one of 'N', 'E', 'S' or 'W' indicating
                                 the orientation of the goal
         '''
+        return (self.board_size, self.goal_entrance, self.goal_direction)
 
 #############################################
 # heuristics                                #
@@ -123,7 +126,7 @@ def rushhour_goal_fn(state):
 
 
 def make_init_state(board_size, vehicle_list, goal_entrance, goal_direction):
-#IMPLEMENT
+#IMPLEMENT DONE
     '''Input the following items which specify a state and return a rushhour object
        representing this initial state.
          The state's its g-value is zero
@@ -148,7 +151,7 @@ def make_init_state(board_size, vehicle_list, goal_entrance, goal_direction):
          (b) all locations are integer pairs (x,y) where 0<=x<=n-1 and 0<=y<=m-1
          (c) vehicle lengths are positive integers
     '''
-    s = rushhour("START", 0, None)
+    s = rushhour("START", 0, None, 0)
     s.vehicle_list = vehicle_list
     s.board_size = board_size
     s.goal_entrance = goal_entrance
@@ -243,10 +246,13 @@ def test(nvehicles, board_size):
     final = se.search(s0, rushhour_goal_fn, heur_min_moves)
 
 if __name__ == "__main__":
-    s = make_rand_init_state(2, (5, 5))
+    s = make_rand_init_state(1, (5, 5))
+    '''
     print(s.vehicle_list)
     print(s.board_size)
     print(s.goal_direction)
     print(s.goal_entrance)
+    '''
+    s.print_state()
     
     
