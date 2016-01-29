@@ -11,6 +11,8 @@ rushhour STATESPACE
 
 from search import *
 from random import randint
+'remember to uncomment this later!!!!!'
+'from rushhour_tests import board_size, goal_entrance'
 
 ##################################################
 # The search space class 'rushhour'             #
@@ -19,9 +21,17 @@ from random import randint
 
 
 class rushhour(StateSpace):
-    def __init__(self, action, gval, ... )
+    ''
+    vehicle_list = []
+    board_size = ()
+    goal_entrance = ()
+    goal_direction = 'none'
+    def __init__(self, action, gval, parent):
 #IMPLEMENT
         """Initialize a rushhour search state object."""
+        self.action = action
+        self.gval = gval
+        self.parent = parent
 
     def successors(self):
 #IMPLEMENT
@@ -138,6 +148,12 @@ def make_init_state(board_size, vehicle_list, goal_entrance, goal_direction):
          (b) all locations are integer pairs (x,y) where 0<=x<=n-1 and 0<=y<=m-1
          (c) vehicle lengths are positive integers
     '''
+    s = rushhour("START", 0, None)
+    s.vehicle_list = vehicle_list
+    s.board_size = board_size
+    s.goal_entrance = goal_entrance
+    s.goal_direction = goal_direction
+    return s
 
 ########################################################
 #   Functions provided so that you can more easily     #
@@ -225,3 +241,12 @@ def test(nvehicles, board_size):
     se = SearchEngine('astar', 'full')
     #se.trace_on(2)
     final = se.search(s0, rushhour_goal_fn, heur_min_moves)
+
+if __name__ == "__main__":
+    s = make_rand_init_state(2, (5, 5))
+    print(s.vehicle_list)
+    print(s.board_size)
+    print(s.goal_direction)
+    print(s.goal_entrance)
+    
+    
