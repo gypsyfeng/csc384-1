@@ -25,6 +25,7 @@ class rushhour(StateSpace):
     #instance
     vehicle_list = []
     max_index = 0
+    prec_action = None
     
     #static variables
     board_size = ()
@@ -32,16 +33,16 @@ class rushhour(StateSpace):
     goal_direction = 'none'
     
     def __init__(self, action, gval, parent):
-#IMPLEMENT
+#IMPLEMENT done
         """Initialize a rushhour search state object."""
         self.action = action
         self.gval = gval
         self.parent = parent
         self.index = self.max_index
         rushhour.max_index += 1
-
+    
     def successors(self):
-#IMPLEMENT done
+#IMPLEMENT 
         '''Return list of rushhour objects that are the successors of the current object'''
         succs = []
         board = get_board(self.vehicle_list, self.get_board_properties())
@@ -58,11 +59,12 @@ class rushhour(StateSpace):
             ori = self.vehicle_list[j][3]
             loc = self.vehicle_list[j][1]
             l = self.vehicle_list[j][2]
+            vname = self.vehicle_list[j][0]
             looped = False
             if ori == False:
                 for i in range(1, y):
                     if(board[loc[0]][(loc[1] + i) % y] == '.' or board[loc[0]][(loc[1] + i) % y] == g_direct):
-                        s = rushhour('N', pgval + 1, self)
+                        s = rushhour("move_vehicle(" + vname + ", N)", pgval + 1, self)
                         s.vehicle_list = copy.deepcopy(self.vehicle_list)
                         s.vehicle_list[j][1] = (loc[0],(loc[1] + i) % y)
                         succs.append(s)
@@ -75,7 +77,7 @@ class rushhour(StateSpace):
                     if((board[loc[0]][(loc[1] - i) if (loc[1] - i) >= 0 else y + (loc[1] - i)] == '.' 
                        or board[loc[0]][(loc[1] - i) if (loc[1] - i) >= 0 else y + (loc[1] - i)] 
                        == g_direct) and looped == False):
-                        s = rushhour('S', pgval + 1, self)
+                        s = rushhour("move_vehicle(" + vname + ", S)", pgval + 1, self)
                         s.vehicle_list = copy.deepcopy(self.vehicle_list)
                         s.vehicle_list[j][1] = (loc[0], (loc[1] - i) if (loc[1] - i) >= 0 else y + (loc[1] - i))
                         succs.append(s)
@@ -85,7 +87,7 @@ class rushhour(StateSpace):
             else:
                 for i in range(1, x):
                     if(board[(loc[0] + i) % x][loc[1]] == '.' or board[(loc[0] + i) % x][loc[1]] == g_direct):
-                        s = rushhour('E', pgval + 1, self)
+                        s = rushhour("move_vehicle(" + vname + ", E)", pgval + 1, self)
                         s.vehicle_list = copy.deepcopy(self.vehicle_list)
                         s.vehicle_list[j][1] = ((loc[0] + i) % x, loc[1])
                         succs.append(s)
@@ -98,7 +100,7 @@ class rushhour(StateSpace):
                     if((board[(loc[0] - i) if (loc[0] - i) >= 0 else x + (loc[0] - i)][loc[1]] == '.' 
                        or board[(loc[0] - i) if (loc[0] - i) >= 0 else x + (loc[0] - i)][loc[1]] 
                        == g_direct) and looped == False):
-                        s = rushhour('W', pgval + 1, self)
+                        s = rushhour("move_vehicle(" + vname + ", W)", pgval + 1, self)
                         s.vehicle_list = copy.deepcopy(self.vehicle_list)
                         s.vehicle_list[j][1] = ((loc[0] - i, loc[1]) if (loc[0] - i) >= 0 else x + (loc[0] - i))
                         succs.append(s)
@@ -325,4 +327,5 @@ if __name__ == "__main__":
     
     for s in succs:
         s.print_state()
+        print(s.action)
     
