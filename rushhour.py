@@ -58,22 +58,24 @@ class rushhour(StateSpace):
             ori = self.vehicle_list[j][3]
             loc = self.vehicle_list[j][1]
             l = self.vehicle_list[j][2]
-            'looped = False'
+            looped = False
             if ori == False:
-                for i in range(1, y - l + 1):
+                for i in range(1, y):
                     if(board[loc[0]][(loc[1] + i) % y] == '.' or board[loc[0]][(loc[1] + i) % y] == g_direct):
                         print("up")
                         s = rushhour('U', pgval + 1, self)
                         s.vehicle_list = copy.deepcopy(self.vehicle_list)
                         s.vehicle_list[j][1] = (loc[0],(loc[1] + i) % y)
                         succs.append(s)
-                        
+                        if i >= y - 2:
+                            looped = True
                         #print(s.vehicle_list)
                     else:
                         break
-                for i in range(1, y - l + 1):
-                    if(board[loc[0]][(loc[1] - i) if (loc[1] - i) >= 0 else y + (loc[1] - i)] == '.' 
-                       or board[loc[0]][(loc[1] - i) if (loc[1] - i) >= 0 else y + (loc[1] - i)] == g_direct):
+                for i in range(1, y):
+                    if((board[loc[0]][(loc[1] - i) if (loc[1] - i) >= 0 else y + (loc[1] - i)] == '.' 
+                       or board[loc[0]][(loc[1] - i) if (loc[1] - i) >= 0 else y + (loc[1] - i)] 
+                       == g_direct) and looped == False):
                         print("donw")
                         s = rushhour('D', pgval + 1, self)
                         s.vehicle_list = copy.deepcopy(self.vehicle_list)
