@@ -11,6 +11,7 @@ rushhour STATESPACE
 
 from search import *
 from random import randint
+import copy
 'remember to uncomment this later!!!!!'
 'from rushhour_tests import board_size, goal_entrance'
 
@@ -21,23 +22,68 @@ from random import randint
 
 
 class rushhour(StateSpace):
-    ''
+    #instance
     vehicle_list = []
+    max_index = 0
+    
+    #static variables
     board_size = ()
     goal_entrance = ()
     goal_direction = 'none'
-    def __init__(self, action, gval, parent, index):
+    
+    def __init__(self, action, gval, parent):
 #IMPLEMENT
         """Initialize a rushhour search state object."""
         self.action = action
         self.gval = gval
         self.parent = parent
-        self.index = index
+        self.index = self.max_index
+        rushhour.max_index += 1
 
     def successors(self):
 #IMPLEMENT
         '''Return list of rushhour objects that are the successors of the current object'''
-
+        succs = []
+        board = get_board(self.vehicle_list, self.get_board_properties())
+        'x = self.board_size[0]'
+        y = self.board_size[1]
+        g_direct = self.goal_direction
+        if self.parent != None:
+            pgval = self.gval
+        else:
+            pgval = 1
+        for j in range(0, len(self.vehicle_list)):
+        #for v in self.vehicle_list:
+            'obtaining vehicle properties'
+            ori = self.vehicle_list[j][3]
+            loc = self.vehicle_list[j][1]
+            l = self.vehicle_list[j][2]
+            'looped = False'
+            if ori == False:
+                for i in range(1, y - l + 1):
+                    if(board[loc[0]][(loc[1] + i) % y] == '.' or board[loc[0]][(loc[1] + i) % y] == g_direct):
+                        print("up")
+                        s = rushhour('U', pgval + 1, self)
+                        s.vehicle_list = copy.deepcopy(self.vehicle_list)
+                        s.vehicle_list[j][1] = (loc[0],(loc[1] + i) % y)
+                        succs.append(s)
+                        
+                        #print(s.vehicle_list)
+                    else:
+                        break
+                for i in range(1, y - l + 1):
+                    if(board[loc[0]][(loc[1] - i) if (loc[1] - i) >= 0 else y + (loc[1] - i)] == '.' 
+                       or board[loc[0]][(loc[1] - i) if (loc[1] - i) >= 0 else y + (loc[1] - i)] == g_direct):
+                        print("donw")
+                        s = rushhour('D', pgval + 1, self)
+                        s.vehicle_list = copy.deepcopy(self.vehicle_list)
+                        s.vehicle_list[j][1] = (loc[0], (loc[1] - i) if (loc[1] - i) >= 0 else y + (loc[1] - i))
+                        succs.append(s)
+                    else:
+                        break
+        return succs
+                    
+            
     def hashable_state(self):
 #IMPLEMENT
         '''Return a data item that can be used as a dictionary key to UNIQUELY represent the state.'''
@@ -151,11 +197,11 @@ def make_init_state(board_size, vehicle_list, goal_entrance, goal_direction):
          (b) all locations are integer pairs (x,y) where 0<=x<=n-1 and 0<=y<=m-1
          (c) vehicle lengths are positive integers
     '''
-    s = rushhour("START", 0, None, 0)
+    s = rushhour("START", 0, None)
     s.vehicle_list = vehicle_list
-    s.board_size = board_size
-    s.goal_entrance = goal_entrance
-    s.goal_direction = goal_direction
+    rushhour.board_size = board_size
+    rushhour.goal_entrance = goal_entrance
+    rushhour.goal_direction = goal_direction
     return s
 
 ########################################################
@@ -208,7 +254,9 @@ def make_rand_init_state(nvehicles, board_size):
             # make the goal vehicle and goal
             x = randint(0, n - 1)
             y = randint(0, m - 1)
-            is_horizontal = True if randint(0, 1) else False
+            is_horizontal = False
+            'Remember to uncomment this!!!!'
+            'is_horizontal = True if randint(0, 1) else False'
             vehicle_list.append(['gv', (x, y), 2, is_horizontal, True])
             if is_horizontal:
                 board_properties[1] = ((x + n // 2 + 1) % n, y)
@@ -247,12 +295,11 @@ def test(nvehicles, board_size):
 
 if __name__ == "__main__":
     s = make_rand_init_state(1, (5, 5))
-    '''
-    print(s.vehicle_list)
-    print(s.board_size)
-    print(s.goal_direction)
-    print(s.goal_entrance)
-    '''
-    s.print_state()
     
+    print(s.vehicle_list)
+    
+    s.print_state()
+    succs = s.successors()
+    for s in succs:
+        s.print_state()
     
