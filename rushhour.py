@@ -41,11 +41,11 @@ class rushhour(StateSpace):
         rushhour.max_index += 1
 
     def successors(self):
-#IMPLEMENT
+#IMPLEMENT done
         '''Return list of rushhour objects that are the successors of the current object'''
         succs = []
         board = get_board(self.vehicle_list, self.get_board_properties())
-        'x = self.board_size[0]'
+        x = self.board_size[0]
         y = self.board_size[1]
         g_direct = self.goal_direction
         if self.parent != None:
@@ -62,8 +62,7 @@ class rushhour(StateSpace):
             if ori == False:
                 for i in range(1, y):
                     if(board[loc[0]][(loc[1] + i) % y] == '.' or board[loc[0]][(loc[1] + i) % y] == g_direct):
-                        print("up")
-                        s = rushhour('U', pgval + 1, self)
+                        s = rushhour('N', pgval + 1, self)
                         s.vehicle_list = copy.deepcopy(self.vehicle_list)
                         s.vehicle_list[j][1] = (loc[0],(loc[1] + i) % y)
                         succs.append(s)
@@ -76,13 +75,36 @@ class rushhour(StateSpace):
                     if((board[loc[0]][(loc[1] - i) if (loc[1] - i) >= 0 else y + (loc[1] - i)] == '.' 
                        or board[loc[0]][(loc[1] - i) if (loc[1] - i) >= 0 else y + (loc[1] - i)] 
                        == g_direct) and looped == False):
-                        print("donw")
-                        s = rushhour('D', pgval + 1, self)
+                        s = rushhour('S', pgval + 1, self)
                         s.vehicle_list = copy.deepcopy(self.vehicle_list)
                         s.vehicle_list[j][1] = (loc[0], (loc[1] - i) if (loc[1] - i) >= 0 else y + (loc[1] - i))
                         succs.append(s)
                     else:
                         break
+            
+            else:
+                for i in range(1, x):
+                    if(board[(loc[0] + i) % x][loc[1]] == '.' or board[(loc[0] + i) % x][loc[1]] == g_direct):
+                        s = rushhour('E', pgval + 1, self)
+                        s.vehicle_list = copy.deepcopy(self.vehicle_list)
+                        s.vehicle_list[j][1] = ((loc[0] + i) % x, loc[1])
+                        succs.append(s)
+                        if i >= x - 2:
+                            looped = True
+                        #print(s.vehicle_list)
+                    else:
+                        break
+                for i in range(1, x):
+                    if((board[(loc[0] - i) if (loc[0] - i) >= 0 else x + (loc[0] - i)][loc[1]] == '.' 
+                       or board[(loc[0] - i) if (loc[0] - i) >= 0 else x + (loc[0] - i)][loc[1]] 
+                       == g_direct) and looped == False):
+                        s = rushhour('W', pgval + 1, self)
+                        s.vehicle_list = copy.deepcopy(self.vehicle_list)
+                        s.vehicle_list[j][1] = ((loc[0] - i, loc[1]) if (loc[0] - i) >= 0 else x + (loc[0] - i))
+                        succs.append(s)
+                    else:
+                        break
+            
         return succs
                     
             
@@ -256,9 +278,7 @@ def make_rand_init_state(nvehicles, board_size):
             # make the goal vehicle and goal
             x = randint(0, n - 1)
             y = randint(0, m - 1)
-            is_horizontal = False
-            'Remember to uncomment this!!!!'
-            'is_horizontal = True if randint(0, 1) else False'
+            is_horizontal = True if randint(0, 1) else False
             vehicle_list.append(['gv', (x, y), 2, is_horizontal, True])
             if is_horizontal:
                 board_properties[1] = ((x + n // 2 + 1) % n, y)
@@ -296,12 +316,13 @@ def test(nvehicles, board_size):
     final = se.search(s0, rushhour_goal_fn, heur_min_moves)
 
 if __name__ == "__main__":
-    s = make_rand_init_state(1, (5, 5))
+    s = make_rand_init_state(1, (3, 3))
     
     print(s.vehicle_list)
     
     s.print_state()
     succs = s.successors()
+    
     for s in succs:
         s.print_state()
     
