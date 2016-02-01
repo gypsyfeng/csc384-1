@@ -42,13 +42,13 @@ class rushhour(StateSpace):
         rushhour.max_index += 1
     
     def successors(self):
-#IMPLEMENT 
+#IMPLEMENT done
         '''Return list of rushhour objects that are the successors of the current object'''
         succs = []
         board = get_board(self.vehicle_list, self.get_board_properties())
-        x = self.board_size[0]
-        y = self.board_size[1]
-        g_direct = self.goal_direction
+        y = self.board_size[0]
+        x = self.board_size[1]
+        g_direction = self.goal_direction
         for j in range(0, len(self.vehicle_list)):
             'obtaining vehicle properties'
             
@@ -68,7 +68,7 @@ class rushhour(StateSpace):
                             print(board[k][m])
                     print(loc[0], loc[1] + i + l - 1)
                     '''
-                    if(board[(loc[1] + i + l - 1) % y][loc[0]] == '.' or board[(loc[1] + i + l - 1) % y][loc[0]] == g_direct):
+                    if(board[(loc[1] + i + l - 1) % y][loc[0]] == '.' or board[(loc[1] + i + l - 1) % y][loc[0]] == g_direction):
                         s = rushhour("move_vehicle(" + vname + ", N)", self.gval + 1, self)
                         s.vehicle_list = copy.deepcopy(self.vehicle_list)
                         s.vehicle_list[j][1] = (loc[0],(loc[1] + i) % y)
@@ -87,7 +87,7 @@ class rushhour(StateSpace):
                     '''
                     if((board[(loc[1] - i) if (loc[1] - i) >= 0 else y + (loc[1] - i)][loc[0]] == '.' 
                        or board[(loc[1] - i) if (loc[1] - i) >= 0 else y + (loc[1] - i)][loc[0]] 
-                       == g_direct)):
+                       == g_direction)):
                         s = rushhour("move_vehicle(" + vname + ", S)", self.gval + 1, self)
                         s.vehicle_list = copy.deepcopy(self.vehicle_list)
                         s.vehicle_list[j][1] = (loc[0], (loc[1] - i) if (loc[1] - i) >= 0 else y + (loc[1] - i))
@@ -108,7 +108,7 @@ class rushhour(StateSpace):
                             
                     print((loc[0] + i + l - 1) % x, loc[1])
                     '''
-                    if(board[loc[1]][(loc[0] + i + l - 1) % x] == '.' or board[loc[1]][(loc[0] + i + l - 1) % x] == g_direct):
+                    if(board[loc[1]][(loc[0] + i + l - 1) % x] == '.' or board[loc[1]][(loc[0] + i + l - 1) % x] == g_direction):
                         s = rushhour("move_vehicle(" + vname + ", E)", self.gval + 1, self)
                         s.vehicle_list = copy.deepcopy(self.vehicle_list)
                         s.vehicle_list[j][1] = ((loc[0] + i) % x, loc[1])
@@ -126,7 +126,7 @@ class rushhour(StateSpace):
                     '''
                     if((board[loc[1]][(loc[0] - i) if (loc[0] - i) >= 0 else x + (loc[0] - i)] == '.' 
                        or board[loc[1]][(loc[0] - i) if (loc[0] - i) >= 0 else x + (loc[0] - i)] 
-                       == g_direct)):
+                       == g_direction)):
                         s = rushhour("move_vehicle(" + vname + ", W)", self.gval + 1, self)
                         s.vehicle_list = copy.deepcopy(self.vehicle_list)
                         s.vehicle_list[j][1] = ((loc[0] - i) if (loc[0] - i) >= 0 else x + (loc[0] - i), loc[1])
@@ -201,7 +201,7 @@ def heur_zero(state):
 
 
 def heur_min_moves(state):
-#IMPLEMENT
+#IMPLEMENT Done
     '''rushhour heuristic'''
     #We want an admissible heuristic. Getting to the goal requires
     #one move for each tile of distance.
@@ -217,14 +217,114 @@ def heur_min_moves(state):
     #Our heuristic value is the minimum of MOVES1 and MOVES2 over all goal vehicles.
     #You should implement this heuristic function exactly, even if it is
     #tempting to improve it.
-
+    
+    if(rushhour_goal_fn(state) == True):
+        print("here")
+        return 0
+    #board properties
+    board = get_board(state.vehicle_list, state.get_board_properties())
+    y = state.board_size[0]
+    x = state.board_size[1]
+    g_direction = state.goal_direction
+    # vehicle properties
+    ori = state.vehicle_list[0][3]
+    loc = state.vehicle_list[0][1]
+    l = state.vehicle_list[0][2]
+    num_moves_pos = 0
+    num_moves_neg = 0
+    if ori == False:
+        if(g_direction == "S"):            
+            for i in range(1, y):
+                if(board[(loc[1] + i + l - 1) % y][loc[0]] != g_direction): 
+                    num_moves_pos += 1
+                else:
+                    num_moves_pos += 1
+                    break
+            for i in range(1, y):
+                #checking if the south side of the vehicle is on the goal entrance
+                if(board[(loc[1] - i + l - 1) % y if (loc[1] - i + l - 1) % y >= 0 
+                         else y + (loc[1] - i + l - 1) % y][loc[0]] != g_direction):
+                    num_moves_neg += 1
+                else:
+                    num_moves_neg += 1
+                    break
+        #north oriented goal
+        else:
+            for i in range(1, y):
+                if(board[(loc[1] + i) % y][loc[0]] != g_direction): 
+                    num_moves_pos += 1
+                else:
+                    num_moves_pos += 1
+                    break
+            for i in range(1, y):
+                if(board[(loc[1] - i) % y if (loc[1] - i) % y >= 0 
+                         else y + (loc[1] - i) % y][loc[0]] != g_direction):
+                    num_moves_neg += 1
+                else:
+                    num_moves_neg += 1
+                    break
+    else:
+        if(g_direction == "E"):            
+            for i in range(1, x):
+                if(board[loc[1]][(loc[0] + i + l - 1) % x] != g_direction): 
+                    num_moves_pos += 1
+                else:
+                    num_moves_pos += 1
+                    break
+            for i in range(1, x):
+                #checking if the east side of the vehicle is on the goal entrance
+                if(board[loc[1]][(loc[0] - i + l - 1) % x if (loc[0] - i + l - 1) % x >= 0 
+                         else x + (loc[0] - i + l - 1) % x] != g_direction):
+                    num_moves_neg += 1
+                else:
+                    num_moves_neg += 1
+                    break
+        #west oriented goal
+        else:
+            for i in range(1, x):
+                if(board[loc[1]][(loc[0] + i) % x] != g_direction):
+                    num_moves_pos += 1
+                else:
+                    num_moves_pos += 1
+                    break
+            for i in range(1, x):
+                if(board[loc[1]][(loc[0] - i) % x if (loc[0] - i) % x >= 0 
+                         else x + (loc[0] - i) % x] != g_direction):
+                    num_moves_neg += 1
+                else:
+                    num_moves_neg += 1
+                    break
+    print(num_moves_neg, num_moves_pos)
+    return min(num_moves_neg, num_moves_pos)
 
 def rushhour_goal_fn(state):
-#IMPLEMENT
+#IMPLEMENT DONE
     '''Have we reached a goal state'''
-    gv_loc = state.vehicle_list[0][1]
-    if(gv_loc == state.goal_entrance):
-        print("")
+    #board properties
+    g_direction = state.goal_direction
+    y = state.board_size[0]
+    x = state.board_size[1]
+    #vehicle properties
+    old_gv_loc = state.vehicle_list[0][1]
+    ori_adjusted_gv_loc = None
+    ori = state.vehicle_list[0][3]
+    vlength = state.vehicle_list[0][2]
+    if(ori == True):
+        if(g_direction == "W"):
+            return old_gv_loc == state.goal_entrance
+        #if east oriented goal
+        else:
+            ori_adjusted_gv_loc = ((old_gv_loc[0] + vlength - 1) % x, old_gv_loc[1])
+            return ori_adjusted_gv_loc == state.goal_entrance
+    #if vertical
+    else:
+        if(g_direction == "N"):
+            return old_gv_loc == state.goal_entrance
+        #if south oriented goal
+        else:
+            ori_adjusted_gv_loc = (old_gv_loc[0], (old_gv_loc[1] + vlength - 1) % y) 
+            return ori_adjusted_gv_loc == state.goal_entrance
+    return False
 
 
 def make_init_state(board_size, vehicle_list, goal_entrance, goal_direction):
@@ -348,7 +448,7 @@ def test(nvehicles, board_size):
     final = se.search(s0, rushhour_goal_fn, heur_min_moves)
 
 if __name__ == "__main__":
-    s = make_rand_init_state(3, (4, 4))
+    s = make_rand_init_state(1, (4, 1))
     
     print(s.vehicle_list)
     print(s.goal_entrance)
@@ -359,4 +459,5 @@ if __name__ == "__main__":
     
     for s in succs:
         s.print_state()
+        print(heur_min_moves(s))
     
