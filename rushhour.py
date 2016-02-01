@@ -12,8 +12,9 @@ rushhour STATESPACE
 from search import *
 from random import randint
 import copy
-'remember to uncomment this later!!!!!'
-'from rushhour_tests import board_size, goal_entrance'
+'''
+from rushhour_tests import board_size, goal_entrance
+'''
 
 ##################################################
 # The search space class 'rushhour'             #
@@ -57,82 +58,32 @@ class rushhour(StateSpace):
             l = self.vehicle_list[j][2]
             vname = self.vehicle_list[j][0]
             if ori == False:
-                for i in range(1, y):
-                    '''
-                    print("this is the N " + str(i) + " iteration")
-                    print(vname)
-                    print(board[(loc[1] + i + l - 1) % y][loc[0]] )
-                    for k in range(0, x):
-                        for m in range(0, y):
-                            print(k, m)
-                            print(board[k][m])
-                    print(loc[0], loc[1] + i + l - 1)
-                    '''
-                    if(board[(loc[1] + i + l - 1) % y][loc[0]] == '.' or board[(loc[1] + i + l - 1) % y][loc[0]] == g_direction):
-                        s = rushhour("move_vehicle(" + vname + ", N)", self.gval + 1, self)
-                        s.vehicle_list = copy.deepcopy(self.vehicle_list)
-                        s.vehicle_list[j][1] = (loc[0],(loc[1] + i) % y)
-                        succs.append(s)
-                        if i >= y - 1:
-                            looped = True
-                        #print(s.vehicle_list)
-                    else:
-                        break
-                for i in range(1, y):
-                    '''
-                    print("this is the S " + str(i) + " iteration")
-                    print(vname)
-                    print(board[(loc[1] - i) if (loc[1] - i) >= 0 else y + (loc[1] - i)][loc[0]])
-                    print(loc[0], (loc[1] - i) if (loc[1] - i) >= 0 else y + (loc[1] - i))
-                    '''
-                    if((board[(loc[1] - i) if (loc[1] - i) >= 0 else y + (loc[1] - i)][loc[0]] == '.' 
-                       or board[(loc[1] - i) if (loc[1] - i) >= 0 else y + (loc[1] - i)][loc[0]] 
-                       == g_direction)):
-                        s = rushhour("move_vehicle(" + vname + ", S)", self.gval + 1, self)
-                        s.vehicle_list = copy.deepcopy(self.vehicle_list)
-                        s.vehicle_list[j][1] = (loc[0], (loc[1] - i) if (loc[1] - i) >= 0 else y + (loc[1] - i))
-                        succs.append(s)
-                    else:
-                        break
+                if(board[(loc[1] + 1 + l - 1) % y][loc[0]] == '.' or board[(loc[1] + 1 + l - 1) % y][loc[0]] == g_direction):
+                    s = rushhour("move_vehicle(" + vname + ", N)", self.gval + 1, self)
+                    s.vehicle_list = copy.deepcopy(self.vehicle_list)
+                    s.vehicle_list[j][1] = (loc[0],(loc[1] + 1) % y)
+                    succs.append(s)
+                if((board[(loc[1] - 1) if (loc[1] - 1) >= 0 else y + (loc[1] - 1)][loc[0]] == '.' 
+                   or board[(loc[1] - 1) if (loc[1] - 1) >= 0 else y + (loc[1] - 1)][loc[0]] 
+                   == g_direction)):
+                    s = rushhour("move_vehicle(" + vname + ", S)", self.gval + 1, self)
+                    s.vehicle_list = copy.deepcopy(self.vehicle_list)
+                    s.vehicle_list[j][1] = (loc[0], (loc[1] - 1) if (loc[1] - 1) >= 0 else y + (loc[1] - 1))
+                    succs.append(s)
             
             else:
-                for i in range(1, x):
-                    '''
-                    print("this is the  E " + str(i) + " iteration")
-                    print(vname)
-                    print(board[loc[1]][(loc[0] + i + l - 1) % x])
-                    for k in range(0, x):
-                        for m in range(0, y):
-                            print(k, m)
-                            print(board[k][m])
-                            
-                    print((loc[0] + i + l - 1) % x, loc[1])
-                    '''
-                    if(board[loc[1]][(loc[0] + i + l - 1) % x] == '.' or board[loc[1]][(loc[0] + i + l - 1) % x] == g_direction):
-                        s = rushhour("move_vehicle(" + vname + ", E)", self.gval + 1, self)
-                        s.vehicle_list = copy.deepcopy(self.vehicle_list)
-                        s.vehicle_list[j][1] = ((loc[0] + i) % x, loc[1])
-                        succs.append(s)
-                        if i >= x - 1:
-                            looped = True
-                    else:
-                        break
-                for i in range(1, x):
-                    '''
-                    print("this is the  W " + str(i) + " iteration")
-                    print(vname)
-                    print(board[loc[1]][(loc[0] - i) if (loc[0] - i) >= 0 else x + (loc[0] - i)])
-                    print((loc[0] - i) if (loc[0] - i) >= 0 else x + (loc[0] - i), loc[1])
-                    '''
-                    if((board[loc[1]][(loc[0] - i) if (loc[0] - i) >= 0 else x + (loc[0] - i)] == '.' 
-                       or board[loc[1]][(loc[0] - i) if (loc[0] - i) >= 0 else x + (loc[0] - i)] 
-                       == g_direction)):
-                        s = rushhour("move_vehicle(" + vname + ", W)", self.gval + 1, self)
-                        s.vehicle_list = copy.deepcopy(self.vehicle_list)
-                        s.vehicle_list[j][1] = ((loc[0] - i) if (loc[0] - i) >= 0 else x + (loc[0] - i), loc[1])
-                        succs.append(s)
-                    else:
-                        break
+                if(board[loc[1]][(loc[0] + 1 + l - 1) % x] == '.' or board[loc[1]][(loc[0] + 1 + l - 1) % x] == g_direction):
+                    s = rushhour("move_vehicle(" + vname + ", E)", self.gval + 1, self)
+                    s.vehicle_list = copy.deepcopy(self.vehicle_list)
+                    s.vehicle_list[j][1] = ((loc[0] + 1) % x, loc[1])
+                    succs.append(s)
+                if((board[loc[1]][(loc[0] - 1) if (loc[0] - 1) >= 0 else x + (loc[0] - 1)] == '.' 
+                   or board[loc[1]][(loc[0] - 1) if (loc[0] - 1) >= 0 else x + (loc[0] - 1)] 
+                   == g_direction)):
+                    s = rushhour("move_vehicle(" + vname + ", W)", self.gval + 1, self)
+                    s.vehicle_list = copy.deepcopy(self.vehicle_list)
+                    s.vehicle_list[j][1] = ((loc[0] - 1) if (loc[0] - 1) >= 0 else x + (loc[0] - 1), loc[1])
+                    succs.append(s)
             
         return succs
                     
@@ -140,6 +91,13 @@ class rushhour(StateSpace):
     def hashable_state(self):
 #IMPLEMENT
         '''Return a data item that can be used as a dictionary key to UNIQUELY represent the state.'''
+        v_loc_list =[]
+        for v in self.vehicle_list:
+            v_loc_list.append(v[1][0])
+            v_loc_list.append(v[1][1])
+        v_loc_tuple = tuple(v_loc_list)
+        return v_loc_tuple
+        
 
     def print_state(self):
         #DO NOT CHANGE THIS FUNCTION---it will be used in auto marking
@@ -313,7 +271,7 @@ def rushhour_goal_fn(state):
         if(g_direction == "W"):
             return old_gv_loc == state.goal_entrance
         #if east oriented goal
-        else:
+        elif(g_direction == "E"):
             ori_adjusted_gv_loc = ((old_gv_loc[0] + vlength - 1) % x, old_gv_loc[1])
             return ori_adjusted_gv_loc == state.goal_entrance
     #if vertical
@@ -321,7 +279,7 @@ def rushhour_goal_fn(state):
         if(g_direction == "N"):
             return old_gv_loc == state.goal_entrance
         #if south oriented goal
-        else:
+        elif(g_direction == "S"):
             ori_adjusted_gv_loc = (old_gv_loc[0], (old_gv_loc[1] + vlength - 1) % y) 
             return ori_adjusted_gv_loc == state.goal_entrance
     return False
@@ -448,16 +406,8 @@ def test(nvehicles, board_size):
     final = se.search(s0, rushhour_goal_fn, heur_min_moves)
 
 if __name__ == "__main__":
-    s = make_rand_init_state(1, (4, 1))
-    
-    print(s.vehicle_list)
-    print(s.goal_entrance)
+    s = make_init_state((7, 7), [['gv', (4, 0), 2, False, True]], (4, 1), 'E')
     
     
     s.print_state()
-    succs = s.successors()
-    
-    for s in succs:
-        s.print_state()
-        print(heur_min_moves(s))
-    
+    print(rushhour_goal_fn(s))
