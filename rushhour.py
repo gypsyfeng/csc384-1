@@ -12,9 +12,9 @@ rushhour STATESPACE
 from search import *
 from random import randint
 import copy
-'''
+import math
 from rushhour_tests import board_size, goal_entrance
-'''
+
 
 ##################################################
 # The search space class 'rushhour'             #
@@ -35,10 +35,8 @@ class rushhour(StateSpace):
     
     def __init__(self, action, gval, parent):
 #IMPLEMENT done
+        StateSpace.__init__(self, action, gval, parent)
         """Initialize a rushhour search state object."""
-        self.action = action
-        self.gval = gval
-        self.parent = parent
         self.index = self.max_index
         rushhour.max_index += 1
     
@@ -46,13 +44,12 @@ class rushhour(StateSpace):
 #IMPLEMENT done
         '''Return list of rushhour objects that are the successors of the current object'''
         succs = []
-        board = get_board(self.vehicle_list, self.get_board_properties())
+        board = get_vehicle_board(self.vehicle_list, self.get_board_properties())
         y = self.board_size[0]
         x = self.board_size[1]
         g_direction = self.goal_direction
         for j in range(0, len(self.vehicle_list)):
             'obtaining vehicle properties'
-            
             ori = self.vehicle_list[j][3]
             loc = self.vehicle_list[j][1]
             l = self.vehicle_list[j][2]
@@ -84,7 +81,6 @@ class rushhour(StateSpace):
                     s.vehicle_list = copy.deepcopy(self.vehicle_list)
                     s.vehicle_list[j][1] = ((loc[0] - 1) if (loc[0] - 1) >= 0 else x + (loc[0] - 1), loc[1])
                     succs.append(s)
-            
         return succs
                     
             
@@ -177,13 +173,13 @@ def heur_min_moves(state):
     #tempting to improve it.
     
     if(rushhour_goal_fn(state) == True):
-        print("here")
         return 0
     #board properties
     board = get_board(state.vehicle_list, state.get_board_properties())
     y = state.board_size[0]
     x = state.board_size[1]
     g_direction = state.goal_direction
+    g_loc = state.goal_entrance
     # vehicle properties
     ori = state.vehicle_list[0][3]
     loc = state.vehicle_list[0][1]
@@ -191,6 +187,10 @@ def heur_min_moves(state):
     num_moves_pos = 0
     num_moves_neg = 0
     if ori == False:
+        if(g_direction == "E" or g_direction == "W"):
+            return(float("inf"))
+        if(loc[0] != g_loc[0]):
+            return(float("inf"))
         if(g_direction == "S"):            
             for i in range(1, y):
                 if(board[(loc[1] + i + l - 1) % y][loc[0]] != g_direction): 
@@ -222,6 +222,10 @@ def heur_min_moves(state):
                     num_moves_neg += 1
                     break
     else:
+        if(g_direction == "N" or g_direction == "S"):
+            return(float("inf"))
+        if(loc[1] != g_loc[1]):
+            return(float("inf"))
         if(g_direction == "E"):            
             for i in range(1, x):
                 if(board[loc[1]][(loc[0] + i + l - 1) % x] != g_direction): 
@@ -252,7 +256,6 @@ def heur_min_moves(state):
                 else:
                     num_moves_neg += 1
                     break
-    print(num_moves_neg, num_moves_pos)
     return min(num_moves_neg, num_moves_pos)
 
 def rushhour_goal_fn(state):
@@ -405,9 +408,40 @@ def test(nvehicles, board_size):
     #se.trace_on(2)
     final = se.search(s0, rushhour_goal_fn, heur_min_moves)
 
-if __name__ == "__main__":
-    s = make_init_state((7, 7), [['gv', (4, 0), 2, False, True]], (4, 1), 'E')
+#own function to make a vehicle board in the case that another vehicle overlaps with the goal
+def get_vehicle_board(vehicle_statuses, board_properties):
+    #DO NOT CHANGE THIS FUNCTION---it will be used in auto marking
+    #and in generating sample trace output.
+    #Note that if you implement the "get" routines
+    #(rushhour.get_vehicle_statuses() and rushhour.get_board_size())
+    #properly, this function should work irrespective of how you represent
+    #your state.
+    (m, n) = board_properties[0]
+    board = [list(['.'] * n) for i in range(m)]
+    for vs in vehicle_statuses:
+        for i in range(vs[2]):  # vehicle length
+            if vs[3]:
+                # vehicle is horizontal
+                board[vs[1][1]][(vs[1][0] + i) % n] = vs[0][0]
+                # represent vehicle as first character of its name
+            else:
+                # vehicle is vertical
+                board[(vs[1][1] + i) % m][vs[1][0]] = vs[0][0]
+                # represent vehicle as first character of its name
+    return board
+
+'''
+if __name__ == '__main__':
+    s = make_init_state((4,5), [['gv', (1, 1), 3, True, True]], (2, 4), 'E')
+    #board = get_board(s.vehicle_list, s.get_board_properties())
+    board_properties = s.get_board_properties()
+    print(board_properties[1][1])
+    print(board_properties[1][0])
+    #print(board[board_properties[1][1]][board_properties[1][0]])
+    #s.print_state()
+    #g = s.successors()
+    #for succs in g:
+        #succs.print_state()
+        '''
     
     
-    s.print_state()
-    print(rushhour_goal_fn(s))
